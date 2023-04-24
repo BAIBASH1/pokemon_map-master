@@ -65,17 +65,19 @@ def show_pokemon(request, pokemon_id):
     next_evolution = {}
     previous_evolution = {}
     if pokemon.next_evolution:
+        next_evolution_pokemon = pokemon.next_evolution
         next_evolution = {
-            "title_ru": pokemon.next_evolution.title,
-            "pokemon_id": pokemon.next_evolution.id,
-            "img_url": request.build_absolute_uri(pokemon.next_evolution.image.url)
+            "title_ru": next_evolution_pokemon.title,
+            "pokemon_id": next_evolution_pokemon.id,
+            "img_url": request.build_absolute_uri(next_evolution_pokemon.image.url)
         }
 
     if pokemon.previous_evolution:
+        previous_evolution_pokemon = pokemon.previous_evolution.all()[0]
         previous_evolution = {
-            "title_ru": pokemon.previous_evolution.all()[0].title,
-            "pokemon_id": pokemon.previous_evolution.all()[0].id,
-            "img_url": request.build_absolute_uri(pokemon.previous_evolution.all()[0].image.url)
+            "title_ru": previous_evolution_pokemon.title,
+            "pokemon_id": previous_evolution_pokemon.id,
+            "img_url": request.build_absolute_uri(previous_evolution_pokemon.image.url)
         }
 
 
