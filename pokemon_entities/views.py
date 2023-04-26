@@ -1,10 +1,8 @@
 import folium
-
-from django.shortcuts import render
-from .models import Pokemon, PokemonEntity
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
-from django.shortcuts import get_object_or_404
 
+from .models import Pokemon, PokemonEntity
 
 MOSCOW_CENTER = [55.751244, 37.618423]
 DEFAULT_IMAGE_URL = (
@@ -27,10 +25,10 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
 
 def show_all_pokemons(request):
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    pokemons = Pokemon.objects.all()
+    datetime_now = timezone.localtime()
     for pokemon_entity in PokemonEntity.objects.filter(
-            appeared_at__lte=timezone.localtime(),
-            disappeared_at__gte=timezone.localtime()):
+            appeared_at__lte=datetime_now,
+            disappeared_at__gte=datetime_now):
         add_pokemon(
             folium_map,
             pokemon_entity.lat,
@@ -40,6 +38,7 @@ def show_all_pokemons(request):
             )
         )
 
+    pokemons = Pokemon.objects.all()
     pokemons_on_page = []
     for pokemon in pokemons:
         pokemons_on_page.append({
@@ -58,10 +57,8 @@ def show_all_pokemons(request):
 
 def show_pokemon(request, pokemon_id):
     pokemon = get_object_or_404(Pokemon, id=pokemon_id)
-    next_evolution = {}
-    previous_evolution = {}
-
     next_evolution_pokemon = pokemon.next_evolution
+    next_evolution = {}
     if next_evolution_pokemon:
         next_evolution = {
             "title_ru": next_evolution_pokemon.title,
@@ -71,7 +68,8 @@ def show_pokemon(request, pokemon_id):
             )
         }
 
-    previous_evolution_pokemon = pokemon.previous_evolutions.all().first()
+    previous_evolution_pokemon = pokemon.previous_evolutions.first()
+    previous_evolution = {}
     if previous_evolution_pokemon:
         previous_evolution = {
             "title_ru": previous_evolution_pokemon.title,
@@ -81,14 +79,15 @@ def show_pokemon(request, pokemon_id):
             )
         }
 
-    pokemon_serialized = {"img_url": request.build_absolute_uri(pokemon.image.url),
-                    "title_ru": pokemon.title,
-                    "description": pokemon.description,
-                    "title_jp": pokemon.title_jp,
-                    "title_en": pokemon.title_en,
-                    "next_evolution": next_evolution,
-                    "previous_evolution": previous_evolution
-                    }
+    pokemon_serialized = {
+        "img_url": request.build_absolute_uri(pokemon.image.url),
+        "title_ru": pokemon.title,
+        "description": pokemon.description,
+        "title_jp": pokemon.title_jp,
+        "title_en": pokemon.title_en,
+        "next_evolution": next_evolution,
+        "previous_evolution": previous_evolution
+    }
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     for pokemon_entity in PokemonEntity.objects.filter(pokemon=pokemon):

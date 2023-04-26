@@ -20,7 +20,7 @@ class Pokemon(models.Model):
     image = models.ImageField(
         blank=True,
         verbose_name="фотография",
-        default=""
+        default="no_image.png"
     )
 
     description = models.TextField(
@@ -45,7 +45,7 @@ class PokemonEntity(models.Model):
         Pokemon,
         on_delete=models.CASCADE,
         verbose_name="какой покемон",
-        related_name="pokemon_entities"
+        related_name="entities"
     )
 
     lat = models.FloatField(verbose_name="широта")
